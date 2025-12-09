@@ -12,9 +12,9 @@ import com.econnect.cart_service.cart.dto.CartItemDetailResponse;
 import com.econnect.cart_service.cart.dto.CartItemRequest;
 import com.econnect.cart_service.cart.repository.CartItemRepository;
 import com.econnect.cart_service.dto.ItemDetailResponse;
+import com.econnect.cart_service.feign.ItemClient;
 import com.econnect.cart_service.model.Cart;
 import com.econnect.cart_service.model.CartItem;
-import com.econnect.cart_service.proxy.item.ItemProxy;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
@@ -24,8 +24,8 @@ import lombok.extern.log4j.Log4j2;
 @Log4j2
 public class CartItemService {
 
-  private final ItemProxy itemProxy;
   private final CartItemRepository cartItemRepository;
+  private final ItemClient itemClient;
 
   private final BigDecimal ZERO = new BigDecimal(0);
 
@@ -36,18 +36,6 @@ public class CartItemService {
           cartItem -> cartItemDetailResponses.add(buildCartItemResponse(cartItem, null)));
     }
     return cartItemDetailResponses;
-  }
-
-  private ItemDetailResponse fetchItemDetails(Long itemId) {
-    ItemDetailResponse itemDetailResponse = null;
-    try {
-      itemDetailResponse = itemProxy.get(itemId);
-    } catch (Exception e) {
-      log.error("Error while fetching item detail response for Item Id: {}", itemId, e);
-      return null;
-    }
-    log.debug("Successfully fetched the item details");
-    return itemDetailResponse;
   }
 
   private CartItemDetailResponse buildCartItemResponse(CartItem cartItem, ItemDetailResponse itemDetailResponse) {
@@ -61,7 +49,7 @@ public class CartItemService {
         .taxAmount(cartItem.getTaxAmount())
         .miscAmount(cartItem.getMiscAmount())
         .itemDetailResponse(
-            ObjectUtils.isEmpty(itemDetailResponse) ? fetchItemDetails(cartItem.getItemId()) : itemDetailResponse)
+            ObjectUtils.isEmpty(itemDetailResponse) ? getItemDetail(cartItem.getItemId()) : itemDetailResponse)
         .build();
   }
 
@@ -75,7 +63,7 @@ public class CartItemService {
 
   public CartItemDetailResponse post(CartItemRequest cartItemRequest) {
     Long itemId = cartItemRequest.getItemId();
-    ItemDetailResponse itemDetailResponse = fetchItemDetails(itemId);
+    ItemDetailResponse itemDetailResponse = getItemDetail(itemId);
     log.debug("Successfully fetched Item details");
 
     CartItem saveCartItem = null;
@@ -87,8 +75,9 @@ public class CartItemService {
       saveCartItem = modifyItemQuantity(cartItem, quantity);
     } else {
       BigDecimal totalAmount = sellingPrice.multiply(quantity);
-      saveCartItem = CartItem.builder().itemId(itemId).totalPrice(totalAmount).quantity(quantity)
+      saveCartItem = CartItem.builder().cartId(cartItemRequest.getCartId()).itemId(itemId).totalPrice(totalAmount).quantity(quantity)
           .userId(cartItemRequest.getUserId())
+          .isActive(true)
           .sellingPrice(sellingPrice).taxAmount(ZERO).discountPrice(ZERO).miscAmount(ZERO).build();
     }
 
@@ -98,7 +87,7 @@ public class CartItemService {
 
   public CartItemDetailResponse put(CartItemRequest cartItemRequest) throws Exception {
     Long itemId = cartItemRequest.getItemId();
-    ItemDetailResponse itemDetailResponse = fetchItemDetails(cartItemRequest.getItemId());
+    ItemDetailResponse itemDetailResponse = getItemDetail(cartItemRequest.getItemId());
 
     BigDecimal quantity = new BigDecimal(cartItemRequest.getQuantity());
     if (quantity.compareTo(ZERO) <= 0) {
@@ -160,5 +149,15 @@ public class CartItemService {
 
   private CartItem save(CartItem cartItem) {
     return cartItemRepository.save(cartItem);
+  }
+  private ItemDetailResponse getItemDetail(Long itemId) {
+    ItemDetailResponse itemDetailResponse = null;
+    try {
+        itemDetailResponse = itemClient.get(itemId).getBody();
+    } catch (Exception e) {
+      log.error("Error while fetching the Item details for itemID: {}", itemId, e);
+      return null;
+    }
+    return itemDetailResponse;
   }
 }

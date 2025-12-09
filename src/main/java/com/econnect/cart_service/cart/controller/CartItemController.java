@@ -54,7 +54,7 @@ public class CartItemController {
       return new ResponseEntity<>(cartItemDetailResponse, HttpStatus.BAD_REQUEST);
     }
     try {
-      cartItemDetailResponse = cartItemService.post(cartItemRequest);
+      cartItemDetailResponse = cartItemService.put(cartItemRequest);
       if (ObjectUtils.isEmpty(cartItemDetailResponse)) {
         log.warn("No Cart has been created : {}", cartItemRequest.getUserId());
         return new ResponseEntity<>(cartItemDetailResponse, HttpStatus.NOT_FOUND);

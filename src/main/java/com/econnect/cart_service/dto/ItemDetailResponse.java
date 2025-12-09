@@ -20,7 +20,7 @@ public class ItemDetailResponse implements Serializable {
 
   private static final long serialVersionUID = 1L;
 
-  private String itemId;
+  private Long itemId;
   private String itemNumber;
   private List<Media> medias;
   private Map<String, String> itemTitles;
