@@ -1,7 +1,7 @@
 package com.econnect.cart_service.model;
 
 import java.math.BigDecimal;
-import java.sql.Date;
+import java.util.Date;
 import java.util.List;
 
 import jakarta.persistence.Column;
@@ -42,8 +42,8 @@ public class Cart extends BaseRecord {
     private Long userId;
     @Column(name = "SELLING_PRICE")
     private BigDecimal sellingPrice;
-    @Column(name = "MSRP_PRICE")
-    private BigDecimal msrpPrice;
+    @Column(name = "TOTAL_AMOUNT")
+    private BigDecimal totalAmount;
     @Column(name = "LIST_PRICE")
     private BigDecimal listPrice;
     @Column(name = "TOTAL_DISCOUNT")
@@ -52,7 +52,8 @@ public class Cart extends BaseRecord {
     private BigDecimal taxAmount;
     @Column(name = "TOTAL_MISC_AMOUNT")
     private BigDecimal miscAmount;
-    @OneToMany(mappedBy = "CART_ID", fetch = FetchType.EAGER)
+    @OneToMany(mappedBy = "cart", fetch = FetchType.EAGER)
     private List<CartItem> cartItems;
+    @Column(name = "ACTIVE")
     private Boolean isActive;
 }

@@ -22,7 +22,7 @@ public class CartItemDetailResponse implements Serializable {
     private Long cartItemId;
 
     private BigDecimal sellingPrice;
-    private BigDecimal msrpPrice;
+    private BigDecimal totalPrice;
     private BigDecimal listPrice;
     private BigDecimal discountPrice;
     private BigDecimal taxAmount;

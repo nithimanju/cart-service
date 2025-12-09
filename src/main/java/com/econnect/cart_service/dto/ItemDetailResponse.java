@@ -4,21 +4,18 @@ import java.io.Serializable;
 import java.util.List;
 import java.util.Map;
 
-import com.e_connect.part_service.model.BaseItemDetail;
-import com.e_connect.part_service.model.Media;
-
 import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-import lombok.experimental.SuperBuilder;
 
-@SuperBuilder(toBuilder = true)
+@Builder(toBuilder = true)
 @Getter
 @NoArgsConstructor
 @AllArgsConstructor
-@EqualsAndHashCode(callSuper = true)
+@EqualsAndHashCode
 public class ItemDetailResponse implements Serializable {
 
   private static final long serialVersionUID = 1L;
@@ -36,7 +33,6 @@ public class ItemDetailResponse implements Serializable {
   private float rating;
   private Availability availability;
   private List<Dealer> dealers;
-  private Brand brand;
 
   @NoArgsConstructor
   @AllArgsConstructor
@@ -75,4 +71,14 @@ public class ItemDetailResponse implements Serializable {
     private String availabilityDescription;
     private int availabilityCount;
   }
+  @NoArgsConstructor
+  @AllArgsConstructor
+  @Builder
+  @Getter
+  public static class Media {
+    private String mediaId;
+    private String mediaName;
+    private String mediaPath;
+    private String sequence;
+}
 }
