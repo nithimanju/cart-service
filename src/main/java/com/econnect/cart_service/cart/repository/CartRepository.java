@@ -10,4 +10,5 @@ import com.econnect.cart_service.model.Cart;
 @Repository
 public interface CartRepository extends JpaRepository<Cart, Long> {
     Optional<Cart> findByCartIdAndUserIdAndIsActiveTrue(Long cartId, Long usreId);
+    Optional<Cart> findByUserIdAndIsActiveTrue(Long usreId);
 }

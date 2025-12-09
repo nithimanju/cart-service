@@ -12,9 +12,9 @@ import com.econnect.cart_service.proxy.RestService;
 @Service
 public class ItemProxy extends RestService<Long, ItemDetailResponse> {
 
-    public ItemProxy(RestClient restClient) {
-        super(restClient);
-    }
+    // public ItemProxy(RestClient restClient) {
+    //     super(restClient);
+    // }
 
     private String getBaseURL() {
         return "https://item-service";

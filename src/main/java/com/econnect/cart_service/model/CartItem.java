@@ -36,8 +36,8 @@ public class CartItem extends BaseRecord {
     private Long userId;
     @Column(name = "SELLING_PRICE")
     private BigDecimal sellingPrice;
-    @Column(name = "MSRP_PRICE")
-    private BigDecimal msrpPrice;
+    @Column(name = "TOTAL_PRICE")
+    private BigDecimal totalPrice;
     @Column(name = "LIST_PRICE")
     private BigDecimal listPrice;
     @Column(name = "DISCOUNT_AMOUNT")
@@ -48,4 +48,8 @@ public class CartItem extends BaseRecord {
     private BigDecimal miscAmount;
     @Column(name = "ITEM_ID")
     private Long itemId;
+    @Column(name = "ACTIVE")
+    private Boolean isActive;
+    @Column(name = "QUANTITY")
+    private BigDecimal quantity;
 }

@@ -1,6 +1,6 @@
 package com.econnect.cart_service.model;
 
-import java.sql.Date;
+import java.util.Date;
 
 import jakarta.persistence.Column;
 import lombok.AllArgsConstructor;
