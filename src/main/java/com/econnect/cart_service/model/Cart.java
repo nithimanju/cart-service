@@ -2,15 +2,17 @@ package com.econnect.cart_service.model;
 
 import java.math.BigDecimal;
 import java.sql.Date;
+import java.util.List;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
 import lombok.AllArgsConstructor;
-import lombok.Builder;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -48,6 +50,9 @@ public class Cart extends BaseRecord {
     private BigDecimal discountPrice;
     @Column(name = "TOTAL_TAX")
     private BigDecimal taxAmount;
-    @Column(name = "TAOTAL_MISC_AMOUNT")
+    @Column(name = "TOTAL_MISC_AMOUNT")
     private BigDecimal miscAmount;
+    @OneToMany(mappedBy = "CART_ID", fetch = FetchType.EAGER)
+    private List<CartItem> cartItems;
+    private Boolean isActive;
 }
