@@ -32,6 +32,9 @@ public class CartItem extends BaseRecord {
     @ManyToOne
     @JoinColumn(name = "CART_ID", insertable = false, updatable = false)
     private Cart cart;
+
+    @Column(name = "CART_ID")
+    private Long cartId;
     @Column(name = "OWNER_USER_ID")
     private Long userId;
     @Column(name = "SELLING_PRICE")
