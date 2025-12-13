@@ -30,7 +30,7 @@ public class CartController {
   @GetMapping(value = "/cart", produces = MediaType.APPLICATION_JSON_VALUE)
   public ResponseEntity<CartDetailResponse> get(@RequestParam(required = false) Long cartId, @RequestParam Long userId, @RequestParam(required = false) List<Long> cartStatusIds) {
     log.debug("Request for fetching Cart-detail for Cart id: {}", cartId, userId);
-    CartRequest cartRequest = CartRequest.builder().cartId(cartId).userId(userId).build();
+    CartRequest cartRequest = CartRequest.builder().cartId(cartId).userId(userId).cartStatusIds(cartStatusIds).build();
     CartDetailResponse cartDetailResponse = null;
     try {
       cartDetailResponse = cartService.get(cartRequest);
