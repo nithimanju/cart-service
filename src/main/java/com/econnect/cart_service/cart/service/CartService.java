@@ -35,7 +35,6 @@ public class CartService {
     if (ObjectUtils.isEmpty(cartRequest.getCartStatusIds())) {
       cartRequest = cartRequest.toBuilder().cartStatusIds(getCartStatusIds()).build();
     }
-    CartDetailResponse cartDetailResponse = null;
     Cart cart = getEntity(cartRequest);
     log.debug("Cart found for Requested CartId and UserId");
     return buildCartDetailResponse(cart);
@@ -53,12 +52,13 @@ public class CartService {
     }
     return cartList.getFirst();
   }
-
+  @SuppressWarnings("unused")
   private Optional<Cart> findActiveCart(CartRequest cartRequest) {
     return cartRepository.findByUserIdAndIsActiveTrue(
         cartRequest.getUserId());
   }
 
+  @SuppressWarnings("unused")
   private Optional<Cart> findActiveUserCart(CartRequest cartRequest) {
     return cartRepository.findByCartIdAndUserIdAndIsActiveTrue(cartRequest.getCartId(),
         cartRequest.getUserId());
@@ -75,7 +75,7 @@ public class CartService {
         .totalDiscountPrice(cart.getDiscountPrice())
         .totalTaxAmount(cart.getTaxAmount())
         .totalMiscAmount(cart.getMiscAmount())
-        .totalListPrice(cart.getTotalListPrice())
+        .subTotal(cart.getSubTotal())
         .build();
   }
 
@@ -113,7 +113,7 @@ public class CartService {
     return post(cartRequest);
   }
 
-  public BigDecimal updateCartPrices(CartRequest cartRequest) throws Exception {
+  public CartDetailResponse updateCartPrices(CartRequest cartRequest) throws Exception {
     Cart cart = getEntity(cartRequest.toBuilder().cartStatusIds(getCartStatusIds()).build());
     if (ObjectUtils.isEmpty(cart)) {
       log.debug("No Cart found for requested userId and cartId");
@@ -123,7 +123,7 @@ public class CartService {
       log.debug("Deactiving Cart for useId: {}, cartId: {}", cart.getUserId(), cart.getCartId());
       cart = cart.toBuilder().isActive(true).build();
       cartRepository.save(cart);
-      return cart.getTotalAmount();
+      return get(cartRequest);
     }
   }
 
@@ -136,15 +136,15 @@ public class CartService {
     if (ObjectUtils.isNotEmpty(cartItems)) {
       for (CartItem cartItem : cartItems) {
         if (ObjectUtils.isNotEmpty(cartItem)) {
-          calculatedTotalList = calculatedTotalList.add(getBigDecimalValue(cartItem.getListPrice()));
+          calculatedTotalList = calculatedTotalAmount.add(getBigDecimalValue(cartItem.getTotalPrice()));
           calculatedTotalTax = calculatedTotalTax.add(getBigDecimalValue(cartItem.getTaxAmount()));
           calculatedTotalDiscount = calculatedTotalDiscount.add(getBigDecimalValue(cartItem.getDiscountPrice()));
-          calculatedTotalAmount = calculatedTotalAmount.add(getBigDecimalValue(cartItem.getTotalPrice()));
         }
       }
     }
-    cart = cart.toBuilder().totalListPrice(calculatedTotalList).taxAmount(calculatedTotalAmount)
-        .discountPrice(calculatedTotalDiscount).taxAmount(calculatedTotalTax).totalAmount(calculatedTotalAmount)
+    BigDecimal totalCartAmount = calculatedTotalList.add(calculatedTotalTax).subtract(calculatedTotalDiscount);
+    cart = cart.toBuilder().subTotal(calculatedTotalList).taxAmount(calculatedTotalAmount)
+        .discountPrice(calculatedTotalDiscount).taxAmount(calculatedTotalTax).totalAmount(totalCartAmount)
         .build();
     return cart;
   }

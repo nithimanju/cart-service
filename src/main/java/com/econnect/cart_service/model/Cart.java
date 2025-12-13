@@ -40,8 +40,8 @@ public class Cart extends BaseRecord {
     private Date modifiedDate;
     @Column(name = "OWNER_USER_ID")
     private Long userId;
-    @Column(name = "TOTAL_LIST_PRICE")
-    private BigDecimal totalListPrice;
+    @Column(name = "SUB_TOTAL")
+    private BigDecimal subTotal;
     @Column(name = "TOTAL_AMOUNT")
     private BigDecimal totalAmount;
     @Column(name = "TOTAL_DISCOUNT")
