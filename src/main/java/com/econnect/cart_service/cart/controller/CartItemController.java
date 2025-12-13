@@ -3,6 +3,7 @@ package com.econnect.cart_service.cart.controller;
 import org.apache.commons.lang3.BooleanUtils;
 import org.apache.commons.lang3.ObjectUtils;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -29,7 +30,7 @@ public class CartItemController {
   private final CartItemService cartItemService;
   private final CartService cartService;
 
-  @PostMapping("/cartItem")
+  @PostMapping(value = "/cartItem", produces = MediaType.APPLICATION_JSON_VALUE)
   public ResponseEntity<CartItemDetailResponse> post(@RequestBody CartItemRequest cartItemRequest, @RequestParam Long userId, @RequestParam Boolean isGuestUser) {
     log.debug("Request for creating new Cart Item for user: {} and cartId: {}", userId, cartItemRequest.getCartId());
     CartItemDetailResponse cartItemDetailResponse = null;
@@ -54,7 +55,7 @@ public class CartItemController {
     return new ResponseEntity<>(cartItemDetailResponse, HttpStatus.OK);
   }
 
-  @PutMapping("/cartItem")
+  @PutMapping(value = "/cartItem", produces = MediaType.APPLICATION_JSON_VALUE)
   public ResponseEntity<CartItemDetailResponse> put(@RequestBody CartItemRequest cartItemRequest, @RequestParam Long userId, @RequestParam Boolean isGuestUser) {
     log.debug("Request for creating new Cart for user: {}", cartItemRequest.getUserId());
     CartItemDetailResponse cartItemDetailResponse = null;
@@ -78,7 +79,7 @@ public class CartItemController {
     return new ResponseEntity<>(cartItemDetailResponse, HttpStatus.OK);
   }
 
-  @DeleteMapping("/cartItem")
+  @DeleteMapping(value = "/cartItem", produces = MediaType.APPLICATION_JSON_VALUE)
   public ResponseEntity<CartDetailResponse> del(@RequestBody CartItemRequest cartItemRequest, @RequestParam Long userId, @RequestParam Boolean isGuestUser) {
     log.debug("Request for creating new Cart for user: {}", cartItemRequest.getUserId());
     CartDetailResponse cartDetailResponse = null;
