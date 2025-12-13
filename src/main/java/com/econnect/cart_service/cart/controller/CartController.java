@@ -1,7 +1,10 @@
 package com.econnect.cart_service.cart.controller;
 
+import java.util.List;
+
 import org.apache.commons.lang3.ObjectUtils;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -24,26 +27,26 @@ public class CartController {
 
   private final CartService cartService;
 
-  @GetMapping("/cart")
-  public ResponseEntity<CartDetailResponse> get(@RequestParam(required = false) Long cartId, @RequestParam Long userId) {
+  @GetMapping(value = "/cart", produces = MediaType.APPLICATION_JSON_VALUE)
+  public ResponseEntity<CartDetailResponse> get(@RequestParam(required = false) Long cartId, @RequestParam Long userId, @RequestParam(required = false) List<Long> cartStatusIds) {
     log.debug("Request for fetching Cart-detail for Cart id: {}", cartId, userId);
     CartRequest cartRequest = CartRequest.builder().cartId(cartId).userId(userId).build();
     CartDetailResponse cartDetailResponse = null;
     try {
       cartDetailResponse = cartService.get(cartRequest);
       if (ObjectUtils.isEmpty(cartDetailResponse)) {
-        log.warn("No Cart detail found for requested Cart-id : {}", cartId, userId);
+        log.warn("No Cart detail found for requested Cart-id : {}, UserId: {}", cartId, userId);
         return new ResponseEntity<>(cartDetailResponse, HttpStatus.NOT_FOUND);
       }
     } catch (Exception e) {
-      log.error("Error occured while fetching Cart-detail for Cart id: {}", cartId, userId, e);
+      log.error("Error occured while fetching Cart-detail for Cart id: {}, UserId: {}", cartId, userId, e);
       return new ResponseEntity<>(cartDetailResponse, HttpStatus.INTERNAL_SERVER_ERROR);
     }
     log.debug("Cart detail {} for requested CartId: {}", cartDetailResponse, cartId, userId);
     return new ResponseEntity<>(cartDetailResponse, HttpStatus.OK);
   }
 
-  @PostMapping("/cart")
+  @PostMapping(value = "/cart", produces = MediaType.APPLICATION_JSON_VALUE)
   public ResponseEntity<Long> post(@RequestBody CartRequest cartRequest) {
     log.debug("Request for creating new Cart for user: {}", cartRequest.getUserId());
     Long cartId = null;
@@ -65,9 +68,9 @@ public class CartController {
     return new ResponseEntity<>(cartId, HttpStatus.OK);
   }
 
-  @PutMapping("/cart")
+  @PutMapping(value = "/cart", produces = MediaType.APPLICATION_JSON_VALUE)
   public ResponseEntity<Long> put(@RequestBody CartRequest cartRequest) {
-    log.debug("Request for disabling cart: {} and creat new Cart for user: {}", cartRequest.getCartId(),
+    log.debug("Request for disabling cart: {} and create new Cart for user: {}", cartRequest.getCartId(),
         cartRequest.getUserId());
     Long cartId = null;
     if (ObjectUtils.isEmpty(cartRequest.getCartId()) || ObjectUtils.isEmpty(cartRequest.getUserId())) {

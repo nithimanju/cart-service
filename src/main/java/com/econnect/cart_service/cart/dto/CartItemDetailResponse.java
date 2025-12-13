@@ -17,15 +17,16 @@ import lombok.Builder;
 @AllArgsConstructor
 @EqualsAndHashCode
 public class CartItemDetailResponse implements Serializable {
-    private static final long serialVersionUID = 1L;
+  private static final long serialVersionUID = 1L;
 
-    private Long cartItemId;
+  private Long cartItemId;
 
-    private BigDecimal sellingPrice;
-    private BigDecimal totalPrice;
-    private BigDecimal listPrice;
-    private BigDecimal discountPrice;
-    private BigDecimal taxAmount;
-    private BigDecimal miscAmount;
-    private ItemDetailResponse itemDetailResponse;
+  private BigDecimal sellingPrice;
+  private BigDecimal totalPrice;
+  private BigDecimal listPrice;
+  private BigDecimal discountPrice;
+  private BigDecimal taxAmount;
+  private BigDecimal miscAmount;
+  private BigDecimal quantity;
+  private ItemDetailResponse itemDetailResponse;
 }

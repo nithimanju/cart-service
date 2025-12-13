@@ -5,6 +5,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Optional;
 
+import org.apache.commons.lang3.BooleanUtils;
 import org.apache.commons.lang3.ObjectUtils;
 import org.springframework.stereotype.Service;
 
@@ -32,8 +33,10 @@ public class CartItemService {
   public List<CartItemDetailResponse> getCartItems(Cart cart) {
     List<CartItemDetailResponse> cartItemDetailResponses = new LinkedList<>();
     if (ObjectUtils.isNotEmpty(cart.getCartItems())) {
-      cart.getCartItems().parallelStream().forEach(
-          cartItem -> cartItemDetailResponses.add(buildCartItemResponse(cartItem, null)));
+      cart.getCartItems().parallelStream()
+          .filter(cartItem -> (ObjectUtils.isNotEmpty(cartItem) && BooleanUtils.isTrue(cartItem.getIsActive())))
+          .forEach(
+              cartItem -> cartItemDetailResponses.add(buildCartItemResponse(cartItem, null)));
     }
     return cartItemDetailResponses;
   }
@@ -48,12 +51,22 @@ public class CartItemService {
         .discountPrice(cartItem.getDiscountPrice())
         .taxAmount(cartItem.getTaxAmount())
         .miscAmount(cartItem.getMiscAmount())
+        .quantity(getBigDecimalValue(cartItem.getQuantity()))
         .itemDetailResponse(
             ObjectUtils.isEmpty(itemDetailResponse) ? getItemDetail(cartItem.getItemId()) : itemDetailResponse)
         .build();
   }
 
-  private List<CartItem> getAll(Long cartId) {
+  public BigDecimal calculateTotal(Long cartId) {
+    List<CartItem> cartItems = getAll(cartId);
+    if (ObjectUtils.isNotEmpty(cartItems)) {
+      return cartItems.stream().map(CartItem::getTotalPrice).filter(ObjectUtils::isNotEmpty).reduce((a, b) -> b.add(a))
+          .orElse(ZERO);
+    }
+    return ZERO;
+  }
+
+  public List<CartItem> getAll(Long cartId) {
     Optional<List<CartItem>> cartItemsOpt = cartItemRepository.findByCartCartIdAndIsActiveTrue(cartId);
     if (ObjectUtils.isEmpty(cartItemsOpt)) {
       return null;
@@ -67,16 +80,18 @@ public class CartItemService {
     log.debug("Successfully fetched Item details");
 
     CartItem saveCartItem = null;
-    BigDecimal sellingPrice = new BigDecimal(itemDetailResponse.getPrice());
-    BigDecimal quantity = new BigDecimal(cartItemRequest.getQuantity());
+    BigDecimal sellingPrice = itemDetailResponse.getPrice();
+    BigDecimal quantity = getBigDecimalValue(cartItemRequest.getQuantity());
 
     CartItem cartItem = getCartItemforCartIdItemId(cartItemRequest.getCartId(), itemId);
     if (ObjectUtils.isNotEmpty(cartItem)) {
+      quantity = quantity.add(getBigDecimalValue(cartItem.getQuantity()));
       saveCartItem = modifyItemQuantity(cartItem, quantity);
     } else {
       BigDecimal totalAmount = sellingPrice.multiply(quantity);
-      saveCartItem = CartItem.builder().cartId(cartItemRequest.getCartId()).itemId(itemId).totalPrice(totalAmount).quantity(quantity)
-          .userId(cartItemRequest.getUserId())
+      saveCartItem = CartItem.builder().cartId(cartItemRequest.getCartId()).itemId(itemId).totalPrice(totalAmount)
+          .listPrice(itemDetailResponse.getListPrice())
+          .quantity(quantity)
           .isActive(true)
           .sellingPrice(sellingPrice).taxAmount(ZERO).discountPrice(ZERO).miscAmount(ZERO).build();
     }
@@ -89,7 +104,7 @@ public class CartItemService {
     Long itemId = cartItemRequest.getItemId();
     ItemDetailResponse itemDetailResponse = getItemDetail(cartItemRequest.getItemId());
 
-    BigDecimal quantity = new BigDecimal(cartItemRequest.getQuantity());
+    BigDecimal quantity = getBigDecimalValue(cartItemRequest.getQuantity());
     if (quantity.compareTo(ZERO) <= 0) {
       if (del(cartItemRequest)) {
         return null;
@@ -99,7 +114,7 @@ public class CartItemService {
 
     CartItem cartItem = getCartItemforCartIdItemId(cartItemRequest.getCartId(), itemId);
     if (ObjectUtils.isNotEmpty(cartItem)) {
-      CartItem saveCartItem = modifyItemQuantity(cartItem, new BigDecimal(cartItemRequest.getQuantity()));
+      CartItem saveCartItem = modifyItemQuantity(cartItem, getBigDecimalValue(cartItemRequest.getQuantity()));
       saveCartItem = save(saveCartItem);
       return buildCartItemResponse(saveCartItem, itemDetailResponse);
     } else {
@@ -113,11 +128,11 @@ public class CartItemService {
   }
 
   private BigDecimal calculateTotalAmount(CartItem cartItem, BigDecimal quantity) {
-    BigDecimal listPrice = getBigDecimalValue(cartItem.getListPrice());
+    BigDecimal totalPrice = getBigDecimalValue(cartItem.getSellingPrice());
     BigDecimal discountPrice = getBigDecimalValue(cartItem.getDiscountPrice());
     BigDecimal miscPrice = getBigDecimalValue(cartItem.getMiscAmount());
     BigDecimal taxAmount = getBigDecimalValue(cartItem.getTaxAmount());
-    return listPrice.multiply(quantity).add(taxAmount).add(miscPrice).subtract(discountPrice);
+    return totalPrice.multiply(quantity).add(taxAmount).add(miscPrice).subtract(discountPrice);
   }
 
   public Boolean del(CartItemRequest cartItemRequest) {
@@ -150,10 +165,11 @@ public class CartItemService {
   private CartItem save(CartItem cartItem) {
     return cartItemRepository.save(cartItem);
   }
+
   private ItemDetailResponse getItemDetail(Long itemId) {
     ItemDetailResponse itemDetailResponse = null;
     try {
-        itemDetailResponse = itemClient.get(itemId).getBody();
+      itemDetailResponse = itemClient.get(itemId).getBody();
     } catch (Exception e) {
       log.error("Error while fetching the Item details for itemID: {}", itemId, e);
       return null;

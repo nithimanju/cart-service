@@ -7,7 +7,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 
 import com.econnect.cart_service.dto.ItemDetailResponse;
 
-@FeignClient(value = "PART-SERVICE")
+@FeignClient(value = "part-service")
 public interface ItemClient {
     @GetMapping(value = "/part-detail/{id}")
     public ResponseEntity<ItemDetailResponse> get(@PathVariable Long id);

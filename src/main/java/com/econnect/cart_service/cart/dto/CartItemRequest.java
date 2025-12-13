@@ -1,5 +1,7 @@
 package com.econnect.cart_service.cart.dto;
 
+import java.math.BigDecimal;
+
 import lombok.AllArgsConstructor;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
@@ -14,5 +16,5 @@ import lombok.experimental.SuperBuilder;
 public class CartItemRequest extends CartRequest {
     private Long cartItemId;
     private Long itemId;
-    private Long quantity;
+    private BigDecimal quantity;
 }

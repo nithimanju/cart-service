@@ -23,7 +23,7 @@ import lombok.extern.log4j.Log4j2;
 public class WishListController {
   private final WishListService wishListService;
 
-  @GetMapping("/cart")
+  @GetMapping("/wish-list")
   public ResponseEntity<WishListDetailResponse> get(@RequestParam(required = false) Long wishListId, @RequestParam Long userId) {
     log.debug("Request for fetching Cart-detail for Cart id: {}", wishListId, userId);
     WishListRequest wishListRequest = WishListRequest.builder().wishListId(wishListId).userId(userId).build();
@@ -42,7 +42,7 @@ public class WishListController {
     return new ResponseEntity<>(wishListDetailResponse, HttpStatus.OK);
   }
 
-  @PostMapping("/cart")
+  @PostMapping("/wish-list")
   public ResponseEntity<Long> post(@RequestBody WishListRequest wishListRequest) {
     log.debug("Request for creating new Cart for user: {}", wishListRequest.getUserId());
     Long wishListId = null;
@@ -64,7 +64,7 @@ public class WishListController {
     return new ResponseEntity<>(wishListId, HttpStatus.OK);
   }
 
-  @PutMapping("/cart")
+  @PutMapping("/wish-list")
   public ResponseEntity<Long> put(@RequestBody WishListRequest wishListRequest) {
     log.debug("Request for disabling cart: {} and creat new Cart for user: {}", wishListRequest.getWishListId(),
         wishListRequest.getUserId());

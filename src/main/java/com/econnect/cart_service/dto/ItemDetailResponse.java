@@ -1,6 +1,7 @@
 package com.econnect.cart_service.dto;
 
 import java.io.Serializable;
+import java.math.BigDecimal;
 import java.util.List;
 import java.util.Map;
 
@@ -27,7 +28,8 @@ public class ItemDetailResponse implements Serializable {
   private Map<String, List<String>> itemDescriptions;
   private List<Category> parentCategories;
   private Brand brand;
-  private float price;
+  private BigDecimal price;
+  private BigDecimal listPrice;
   private String currency;
   private float discountPercentage;
   private float rating;
