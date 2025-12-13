@@ -136,9 +136,9 @@ public class CartItemService {
   }
 
   public Boolean del(CartItemRequest cartItemRequest) {
-    Optional<CartItem> cartItem = cartItemRepository.findById(cartItemRequest.getCartItemId());
+    CartItem cartItem = getCartItemforCartIdItemId(cartItemRequest.getCartId(), cartItemRequest.getItemId());
     if (ObjectUtils.isNotEmpty(cartItem)) {
-      CartItem deletedCartItem = cartItem.get().toBuilder().isActive(false).build();
+      CartItem deletedCartItem = cartItem.toBuilder().isActive(false).build();
       save(deletedCartItem);
       log.debug("Successfully delted the requested cartItem", cartItemRequest.getCartItemId());
       return true;
