@@ -35,8 +35,6 @@ public class CartItem extends BaseRecord {
 
     @Column(name = "CART_ID")
     private Long cartId;
-    @Column(name = "OWNER_USER_ID")
-    private Long userId;
     @Column(name = "SELLING_PRICE")
     private BigDecimal sellingPrice;
     @Column(name = "TOTAL_PRICE")
