@@ -7,11 +7,14 @@ import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.econnect.cart_service.cart.dto.CartItemDetailResponse;
 import com.econnect.cart_service.cart.dto.CartItemRequest;
+import com.econnect.cart_service.cart.dto.CartRequest;
 import com.econnect.cart_service.cart.service.CartItemService;
+import com.econnect.cart_service.cart.service.CartService;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
@@ -22,17 +25,21 @@ import lombok.extern.log4j.Log4j2;
 public class CartItemController {
 
   private final CartItemService cartItemService;
+  private final CartService cartService;
 
   @PostMapping("/cartItem")
-  public ResponseEntity<CartItemDetailResponse> post(@RequestBody CartItemRequest cartItemRequest) {
-    log.debug("Request for creating new Cart Item for user: {} and cartId: {}", cartItemRequest.getUserId());
+  public ResponseEntity<CartItemDetailResponse> post(@RequestBody CartItemRequest cartItemRequest, @RequestParam Long userId, @RequestParam Boolean isGuestUser) {
+    log.debug("Request for creating new Cart Item for user: {} and cartId: {}", userId, cartItemRequest.getCartId());
     CartItemDetailResponse cartItemDetailResponse = null;
-    if (ObjectUtils.isEmpty(cartItemRequest.getUserId()) || ObjectUtils.isEmpty(cartItemRequest.getCartId()) || ObjectUtils.isEmpty(cartItemRequest.getItemId())) {
+    cartItemRequest = cartItemRequest.toBuilder().userId(userId).build();
+    if (ObjectUtils.isEmpty(cartItemRequest.getUserId()) || ObjectUtils.isEmpty(cartItemRequest.getCartId())
+        || ObjectUtils.isEmpty(cartItemRequest.getItemId())) {
       log.error("Required Parameters missing in the request: {}", cartItemRequest);
       return new ResponseEntity<>(cartItemDetailResponse, HttpStatus.BAD_REQUEST);
     }
     try {
       cartItemDetailResponse = cartItemService.post(cartItemRequest);
+      cartService.updateCartPrices(CartRequest.builder().userId(userId).cartId(cartItemRequest.getCartId()).build());
       if (ObjectUtils.isEmpty(cartItemDetailResponse)) {
         log.warn("No Cart has been created : {}", cartItemRequest.getUserId());
         return new ResponseEntity<>(cartItemDetailResponse, HttpStatus.NOT_FOUND);
@@ -46,7 +53,7 @@ public class CartItemController {
   }
 
   @PutMapping("/cartItem")
-  public ResponseEntity<CartItemDetailResponse> put(@RequestBody CartItemRequest cartItemRequest) {
+  public ResponseEntity<CartItemDetailResponse> put(@RequestBody CartItemRequest cartItemRequest, @RequestParam Long userId, @RequestParam Boolean isGuestUser) {
     log.debug("Request for creating new Cart for user: {}", cartItemRequest.getUserId());
     CartItemDetailResponse cartItemDetailResponse = null;
     if (ObjectUtils.isEmpty(cartItemRequest.getUserId())) {
@@ -55,6 +62,7 @@ public class CartItemController {
     }
     try {
       cartItemDetailResponse = cartItemService.put(cartItemRequest);
+      cartService.updateCartPrices(CartRequest.builder().userId(userId).cartId(cartItemRequest.getCartId()).build());
       if (ObjectUtils.isEmpty(cartItemDetailResponse)) {
         log.warn("No Cart has been created : {}", cartItemRequest.getUserId());
         return new ResponseEntity<>(cartItemDetailResponse, HttpStatus.NOT_FOUND);
